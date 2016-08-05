@@ -20,13 +20,34 @@ WORKDIR /srv
 RUN git clone https://github.com/starmer/team-mood-tracker.git
 WORKDIR /srv/team-mood-tracker
 
+#using SQLITE no need for cumbersome PostgreSQL setup 
+COPY Gemfile Gemfile.lock ./ 
+RUN gem install bundler && bundle install --jobs 20 --retry 5
 
-ENV RAILS_ENV production
-RUN bundle install --without development test
+# Copy the main application.
+COPY . ./
 
-COPY wait-pg-and-start.sh /srv/team-mood-tracker/wait-pg-and-start.sh
-COPY start-rails.sh /srv/team-mood-tracker/start-rails.sh
-RUN chmod +x /srv/team-mood-tracker/wait-pg-and-start.sh /srv/team-mood-tracker/start-rails.sh
+# Expose port 3000 to the Docker host, so we can access it 
+# from the outside.
+EXPOSE 3030
+
+# The main command to run when the container starts. Also 
+# tell the Rails dev server to bind to all interfaces by 
+# default.
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
+
+
+
+
+
+
+#RUN 
+#ENV RAILS_ENV production
+#RUN bundle install --without development test
+
+#COPY wait-pg-and-start.sh /srv/team-mood-tracker/wait-pg-and-start.sh
+#COPY start-rails.sh /srv/team-mood-tracker/start-rails.sh
+#RUN chmod +x /srv/team-mood-tracker/wait-pg-and-start.sh /srv/team-mood-tracker/start-rails.sh
 
 # THE FOLLOWING SECTION MUST BE EDITOR BEFOR BUILDING THE IMAGE
 
@@ -42,4 +63,4 @@ RUN chmod +x /srv/team-mood-tracker/wait-pg-and-start.sh /srv/team-mood-tracker/
 #ENV MAILER_PASSWORD
 #ENV MAILER_DOMAIN
 
-EXPOSE 3030
+#EXPOSE 3030

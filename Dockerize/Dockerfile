@@ -1,5 +1,4 @@
-FROM ruby:2.2.4
-
+FROM ubuntu:14.04
 LABEL Description="Team-mood-tracker (`master`) from ruby:2.2.4"
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -11,6 +10,9 @@ RUN apt-get update && apt-get install -y \
   postgresql-client \
   nodejs \
   sqlite3\
+  libsqlite3-dev \
+  bundler \
+  ruby \
   
 && rm -rf /var/lib/apt/lists/*
 
@@ -18,49 +20,24 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir -p /srv
 WORKDIR /srv
 RUN git clone https://github.com/starmer/team-mood-tracker.git
+#RUN git clone https://github.com/HocineT/team-mood-tracker.git
+
 WORKDIR /srv/team-mood-tracker
 
 #using SQLITE no need for cumbersome PostgreSQL setup 
-COPY Gemfile Gemfile.lock ./ 
+#COPY Gemfile Gemfile.lock ./ 
+#RUN gem update bundler
 RUN gem install bundler && bundle install --jobs 20 --retry 5
-
+RUN rake db:migrate
 # Copy the main application.
 COPY . ./
+#rails s
 
 # Expose port 3000 to the Docker host, so we can access it 
 # from the outside.
-EXPOSE 3030
+#EXPOSE 3000
 
 # The main command to run when the container starts. Also 
 # tell the Rails dev server to bind to all interfaces by 
 # default.
 CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
-
-
-
-
-
-
-#RUN 
-#ENV RAILS_ENV production
-#RUN bundle install --without development test
-
-#COPY wait-pg-and-start.sh /srv/team-mood-tracker/wait-pg-and-start.sh
-#COPY start-rails.sh /srv/team-mood-tracker/start-rails.sh
-#RUN chmod +x /srv/team-mood-tracker/wait-pg-and-start.sh /srv/team-mood-tracker/start-rails.sh
-
-# THE FOLLOWING SECTION MUST BE EDITOR BEFOR BUILDING THE IMAGE
-
-#ENV FETCH_BOT_DATABASE_PASSWORD=password
-#ENV SECRET_KEY_BASE=5ac49f40dff32480affdf061d6afc379f221bb44ac028520451a64071eec9643974989bcf9a1fd0cd6ba55f3615e6e7a1f298bfc1ef43fc0a503c1d67858b0cd
-#ENV STANDUPBOT_USERNAME=master
-#ENV STANDUPBOT_SECRET=master
-
-#ENV MAILER_ADDRESS
-#ENV MAILER_PORT 1025
-#ENV MAILER_AUTHENTICATION
-#ENV MAILER_USERNAME
-#ENV MAILER_PASSWORD
-#ENV MAILER_DOMAIN
-
-#EXPOSE 3030

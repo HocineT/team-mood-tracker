@@ -1,0 +1,20 @@
+version: '2'
+services:
+  db:
+    image: postgres:latest
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - standup_pgdata:/var/lib/postgresql/data/pgdata
+  bot:
+    build: .
+    command: ./wait-pg-and-start.sh db ./start-rails.sh
+    volumes:
+          - ./database.yml:/srv/slack-standup-bot/config/database.yml
+    ports:
+      - 3030:3030
+    depends_on:
+      - db
+volumes:
+  standup_pgdata:
+    external: true

@@ -26,7 +26,7 @@ RUN bundle install --without development test
 
 COPY wait-pg-and-start.sh /srv/team-mood-tracker/wait-pg-and-start.sh
 COPY start-rails.sh /srv/team-mood-tracker/start-rails.sh
-RUN chmod +x /srv/team-mood-trackerwait-pg-and-start.sh /srv/team-mood-tracker/start-rails.sh
+RUN chmod +x /srv/team-mood-tracker/wait-pg-and-start.sh /srv/team-mood-tracker/start-rails.sh
 
 # THE FOLLOWING SECTION MUST BE EDITOR BEFOR BUILDING THE IMAGE
 
